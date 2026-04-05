@@ -76,8 +76,15 @@ export default function SolarSystemSection({
     const logicalWidth = canvas.clientWidth || width / dprRef.current;
     const logicalHeight = canvas.clientHeight || height / dprRef.current;
     const centerX = logicalWidth / 2;
-    const centerY = logicalHeight * 0.54;
-    const maxOrbitRadius = Math.min(logicalWidth * 0.48, logicalHeight * 0.66);
+    const centerY = logicalHeight / 2;
+    const padding = Math.max(14, Math.min(logicalWidth, logicalHeight) * 0.06);
+    const maxOrbitRadius = Math.max(
+      0,
+      Math.min(
+        (logicalWidth / 2 - padding) / 1.04,
+        (logicalHeight / 2 - padding) / ORBIT_Y_SCALE,
+      ),
+    );
     const seconds = elapsedMs / 1000;
 
     context.clearRect(0, 0, logicalWidth, logicalHeight);

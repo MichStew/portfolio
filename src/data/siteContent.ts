@@ -67,6 +67,9 @@ export type SiteContent = {
   headshotSrc?: string;
   headshotAlt?: string;
   seoDescription: string;
+  socialPreviewTitle: string;
+  socialPreviewImageSrc: string;
+  socialPreviewImageAlt: string;
   dayQuestion: string;
   education: {
     institution: string;
@@ -111,6 +114,9 @@ export const siteContent: SiteContent = {
   headshotAlt: 'Portrait of Michael Stewart',
   seoDescription:
     'Michael Stewart is a computer engineering student blending technical execution with technical sales, research, and product-minded communication.',
+  socialPreviewTitle: 'Michael Stewart | Technical + Commercial',
+  socialPreviewImageSrc: '/pics/projectBoard.JPG',
+  socialPreviewImageAlt: 'Preview image for Michael Stewart portfolio',
   dayQuestion: 'it is your day, what shall you do with it?',
   education: {
     institution: 'University of South Carolina',
@@ -318,10 +324,10 @@ export const siteContent: SiteContent = {
   ],
   personalLife: [
     {
-      id: 'garage-gym',
-      title: 'Garage & Gym',
+      id: 'hobbies',
+      title: 'Hobbies',
       description:
-        'I subscribe to the belief that the best engineers get hands on! You can regularly find me rolling around under my mustang... with half the drivetrain sitting in the garage.',
+        'I subscribe to the belief that the best engineers get hands on. Outside of work, that usually means time in the gym or rolling around under my Mustang with half the drivetrain sitting in the garage.',
       imageSrc: '/pics/clutchjob.jpg',
       imageAlt: 'Photo taken while changing my clutch',
       imageCaption: '(Pic I took when changing my clutch.)',

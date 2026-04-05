@@ -16,29 +16,103 @@ type LetterMetrics = {
   isSpace: boolean;
 };
 
-const LETTER_RADIUS = 240;
-const LETTER_PUSH_X = 52;
-const LETTER_PUSH_Y = 34;
-const LETTER_ROTATION = 8;
-const LETTER_SWIRL_X = 14;
-const LETTER_SWIRL_Y = 11;
-const LETTER_SKEW = 5;
-const LETTER_DEPTH = 24;
-const LETTER_TINT_SHIFT = 1;
+type LetterMotionValues = {
+  x: number;
+  y: number;
+  z: number;
+  scaleX: number;
+  scaleY: number;
+  rotate: number;
+  skewX: number;
+  skewY: number;
+  tint: number;
+};
+
+type LetterMotionState = {
+  current: LetterMotionValues;
+  target: LetterMotionValues;
+  velocity: LetterMotionValues;
+};
+
+const LETTER_MOTION_KEYS = [
+  'x',
+  'y',
+  'z',
+  'scaleX',
+  'scaleY',
+  'rotate',
+  'skewX',
+  'skewY',
+  'tint',
+] as const;
+
+const LETTER_RADIUS = 300;
+const LETTER_PUSH_X = 86;
+const LETTER_PUSH_Y = 84;
+const LETTER_ROTATION = 15;
+const LETTER_SWIRL_X = 28;
+const LETTER_SWIRL_Y = 28;
+const LETTER_SKEW = 8;
+const LETTER_DEPTH = 42;
+const LETTER_TINT_SHIFT = 1.18;
+const LETTER_ACTIVE_STIFFNESS = 0.028;
+const LETTER_ACTIVE_DAMPING = 0.92;
+const LETTER_RETURN_STIFFNESS = 0.008;
+const LETTER_RETURN_DAMPING = 0.965;
+const LETTER_RETURN_VERTICAL_STIFFNESS = 0.006;
+const LETTER_RETURN_VERTICAL_DAMPING = 0.972;
+const LETTER_SETTLE_EPSILON = 0.008;
+const LETTER_VELOCITY_EPSILON = 0.008;
+
+const createRestMotionValues = (): LetterMotionValues => ({
+  x: 0,
+  y: 0,
+  z: 0,
+  scaleX: 1,
+  scaleY: 1,
+  rotate: 0,
+  skewX: 0,
+  skewY: 0,
+  tint: 0,
+});
+
+const createVelocityValues = (): LetterMotionValues => ({
+  x: 0,
+  y: 0,
+  z: 0,
+  scaleX: 0,
+  scaleY: 0,
+  rotate: 0,
+  skewX: 0,
+  skewY: 0,
+  tint: 0,
+});
 
 export default function Hero({ name, reducedMotion }: HeroProps) {
   const heroRef = useRef<HTMLElement | null>(null);
   const nameRef = useRef<HTMLHeadingElement | null>(null);
   const letterRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const letterMetricsRef = useRef<LetterMetrics[]>([]);
+  const letterMotionRef = useRef<LetterMotionState[]>([]);
   const pointerFrameRef = useRef<number | null>(null);
+  const motionFrameRef = useRef<number | null>(null);
+  const pointerInsideNameRef = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(true);
+  const [motionReady, setMotionReady] = useState(false);
   const characters = Array.from(name);
 
   useEffect(() => {
+    pointerInsideNameRef.current = false;
+    letterMotionRef.current = characters.map(() => ({
+      current: createRestMotionValues(),
+      target: createRestMotionValues(),
+      velocity: createVelocityValues(),
+    }));
+
     const frame = window.requestAnimationFrame(() => {
       resetHeroShift();
+      syncLetterMotionToDom();
       setLoaded(true);
       measureLetterMetrics();
     });
@@ -46,8 +120,23 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
     return () => {
       window.cancelAnimationFrame(frame);
       cancelPointerFrame();
+      cancelMotionFrame();
     };
   }, [name]);
+
+  useEffect(() => {
+    setMotionReady(false);
+
+    if (reducedMotion) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setMotionReady(true);
+    }, 1400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [name, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion || !heroRef.current) {
@@ -60,6 +149,10 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
 
         if (!entry.isIntersecting) {
           cancelPointerFrame();
+          cancelMotionFrame();
+          pointerInsideNameRef.current = false;
+          setHeroInteractionState('is-hero-active', false);
+          setHeroInteractionState('is-name-active', false);
           resetHeroShift();
           setLetterDefaults();
         }
@@ -73,6 +166,24 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
 
     return () => observer.disconnect();
   }, [reducedMotion]);
+
+  useEffect(() => {
+    if (reducedMotion || !motionReady || !inView) {
+      cancelMotionFrame();
+
+      if (reducedMotion) {
+        setLetterDefaults();
+      }
+
+      return;
+    }
+
+    if (motionFrameRef.current === null) {
+      motionFrameRef.current = window.requestAnimationFrame(runLetterMotion);
+    }
+
+    return () => cancelMotionFrame();
+  }, [inView, motionReady, reducedMotion]);
 
   useEffect(() => {
     const heading = nameRef.current;
@@ -104,6 +215,13 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
     }
   };
 
+  const cancelMotionFrame = () => {
+    if (motionFrameRef.current !== null) {
+      window.cancelAnimationFrame(motionFrameRef.current);
+      motionFrameRef.current = null;
+    }
+  };
+
   const resetHeroShift = () => {
     if (!heroRef.current) {
       return;
@@ -111,6 +229,13 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
 
     heroRef.current.style.setProperty('--hero-shift-x', '0px');
     heroRef.current.style.setProperty('--hero-shift-y', '0px');
+  };
+
+  const setHeroInteractionState = (
+    className: 'is-hero-active' | 'is-name-active',
+    active: boolean,
+  ) => {
+    heroRef.current?.classList.toggle(className, active);
   };
 
   const measureLetterMetrics = () => {
@@ -166,14 +291,95 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
     letter.style.setProperty('--letter-tint', `${tint}`);
   };
 
-  const setLetterDefaults = () => {
-    letterRefs.current.forEach((letter) => {
-      if (!letter || letter.dataset.space === 'true') {
+  const syncLetterMotionToDom = () => {
+    letterRefs.current.forEach((letter, index) => {
+      const motion = letterMotionRef.current[index];
+
+      if (!letter || letter.dataset.space === 'true' || !motion) {
         return;
       }
 
-      applyLetterState(letter, 0, 0, 0, 1, 1, 0, 0, 0, 0);
+      applyLetterState(
+        letter,
+        motion.current.x,
+        motion.current.y,
+        motion.current.z,
+        motion.current.scaleX,
+        motion.current.scaleY,
+        motion.current.rotate,
+        motion.current.skewX,
+        motion.current.skewY,
+        motion.current.tint,
+      );
     });
+  };
+
+  const setLetterDefaults = () => {
+    letterMotionRef.current = characters.map(() => ({
+      current: createRestMotionValues(),
+      target: createRestMotionValues(),
+      velocity: createVelocityValues(),
+    }));
+
+    syncLetterMotionToDom();
+  };
+
+  const setLetterTargetsToRest = () => {
+    letterMotionRef.current.forEach((motion) => {
+      motion.target = createRestMotionValues();
+    });
+  };
+
+  const getIdleMotion = (index: number, now: number) => {
+    const phase = index * 0.68;
+
+    return {
+      y: Math.sin(now * 0.00115 + phase) * (4.5 + (index % 3) * 1.25),
+      rotate: Math.sin(now * 0.00082 + phase) * 0.9,
+    };
+  };
+
+  const runLetterMotion = (now: number) => {
+    const pointerInsideName = pointerInsideNameRef.current;
+
+    letterMotionRef.current.forEach((motion, index) => {
+      const idleMotion = pointerInsideName ? { y: 0, rotate: 0 } : getIdleMotion(index, now);
+
+      LETTER_MOTION_KEYS.forEach((key) => {
+        const targetValue = motion.target[key] + (
+          key === 'y'
+            ? idleMotion.y
+            : key === 'rotate'
+              ? idleMotion.rotate
+              : 0
+        );
+        const stiffness = pointerInsideName
+          ? LETTER_ACTIVE_STIFFNESS
+          : key === 'y'
+            ? LETTER_RETURN_VERTICAL_STIFFNESS
+            : LETTER_RETURN_STIFFNESS;
+        const damping = pointerInsideName
+          ? LETTER_ACTIVE_DAMPING
+          : key === 'y'
+            ? LETTER_RETURN_VERTICAL_DAMPING
+            : LETTER_RETURN_DAMPING;
+
+        motion.velocity[key] += (targetValue - motion.current[key]) * stiffness;
+        motion.velocity[key] *= damping;
+        motion.current[key] += motion.velocity[key];
+
+        if (
+          Math.abs(targetValue - motion.current[key]) < LETTER_SETTLE_EPSILON &&
+          Math.abs(motion.velocity[key]) < LETTER_VELOCITY_EPSILON
+        ) {
+          motion.current[key] = targetValue;
+          motion.velocity[key] = 0;
+        }
+      });
+    });
+
+    syncLetterMotionToDom();
+    motionFrameRef.current = window.requestAnimationFrame(runLetterMotion);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
@@ -181,11 +387,17 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
       return;
     }
 
+    if (!motionReady) {
+      setMotionReady(true);
+    }
+
+    setHeroInteractionState('is-hero-active', true);
+
     const rect = heroRef.current.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
-    const shiftX = ((x - 50) / 50) * 4;
-    const shiftY = ((y - 50) / 50) * 4;
+    const shiftX = ((x - 50) / 50) * 10;
+    const shiftY = ((y - 50) / 50) * 9;
 
     heroRef.current.style.setProperty('--hero-shift-x', `${shiftX}px`);
     heroRef.current.style.setProperty('--hero-shift-y', `${shiftY}px`);
@@ -198,16 +410,23 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
       return;
     }
 
+    if (!motionReady) {
+      setMotionReady(true);
+    }
+
+    pointerInsideNameRef.current = true;
+    setHeroInteractionState('is-name-active', true);
+
     const headingRect = event.currentTarget.getBoundingClientRect();
     const pointerX = event.clientX - headingRect.left;
     const pointerY = event.clientY - headingRect.top;
 
     cancelPointerFrame();
     pointerFrameRef.current = window.requestAnimationFrame(() => {
-      letterRefs.current.forEach((letter, index) => {
+      letterMotionRef.current.forEach((motion, index) => {
         const metrics = letterMetricsRef.current[index];
 
-        if (!letter || !metrics || metrics.isSpace) {
+        if (!metrics || metrics.isSpace) {
           return;
         }
 
@@ -215,10 +434,10 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
         const dy = metrics.y - pointerY;
         const distance = Math.hypot(dx, dy);
         const normalizedForce = Math.max(0, 1 - distance / LETTER_RADIUS);
-        const force = Math.pow(normalizedForce, 1.7);
+        const force = Math.pow(normalizedForce, 1.35);
 
         if (force <= 0.001) {
-          applyLetterState(letter, 0, 0, 0, 1, 1, 0, 0, 0, 0);
+          motion.target = createRestMotionValues();
           return;
         }
 
@@ -236,28 +455,27 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
         const nextY =
           normalY * force * LETTER_PUSH_Y +
           tangentY * force * LETTER_SWIRL_Y +
-          phase * force * 8;
+          phase * force * 12;
         const depth = force * LETTER_DEPTH;
-        const scaleX = 1 + force * 0.22;
-        const scaleY = 1 - force * 0.16;
+        const scaleX = 1 + force * 0.3;
+        const scaleY = 1 - force * 0.2;
         const rotate =
           (normalX * 0.65 + tangentX * 0.35) * force * LETTER_ROTATION;
         const skewX = tangentX * force * LETTER_SKEW;
         const skewY = -normalX * force * (LETTER_SKEW * 0.5);
         const tint = Math.min(1, force * (0.7 + Math.abs(phase) * 0.55));
 
-        applyLetterState(
-          letter,
-          nextX,
-          nextY,
-          depth,
+        motion.target = {
+          x: nextX,
+          y: nextY,
+          z: depth,
           scaleX,
           scaleY,
           rotate,
           skewX,
           skewY,
-          tint * LETTER_TINT_SHIFT,
-        );
+          tint: tint * LETTER_TINT_SHIFT,
+        };
       });
 
       pointerFrameRef.current = null;
@@ -270,12 +488,15 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
       ref={heroRef}
       className={`hero ${loaded ? 'is-loaded' : ''} ${
         inView ? 'is-in-view' : ''
-      }`}
+      } ${motionReady && !reducedMotion ? 'has-live-motion' : ''}`}
       onPointerMove={handlePointerMove}
       onPointerLeave={() => {
         cancelPointerFrame();
+        pointerInsideNameRef.current = false;
+        setHeroInteractionState('is-hero-active', false);
+        setHeroInteractionState('is-name-active', false);
         resetHeroShift();
-        setLetterDefaults();
+        setLetterTargetsToRest();
       }}
       aria-label={name}
     >
@@ -288,11 +509,21 @@ export default function Hero({ name, reducedMotion }: HeroProps) {
         <h1
           ref={nameRef}
           className="hero__name"
-          onPointerEnter={measureLetterMetrics}
+          onPointerEnter={() => {
+            if (!motionReady) {
+              setMotionReady(true);
+            }
+
+            measureLetterMetrics();
+            pointerInsideNameRef.current = true;
+            setHeroInteractionState('is-name-active', true);
+          }}
           onPointerMove={handleNamePointerMove}
           onPointerLeave={() => {
             cancelPointerFrame();
-            setLetterDefaults();
+            pointerInsideNameRef.current = false;
+            setHeroInteractionState('is-name-active', false);
+            setLetterTargetsToRest();
           }}
           aria-label={name}
         >

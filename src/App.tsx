@@ -16,6 +16,23 @@ import { primaryNavItems, siteContent } from './data/siteContent';
 import { useActiveSection } from './hooks/useActiveSection';
 import { useReducedMotion } from './hooks/useReducedMotion';
 
+function setMetaTag(
+  selector: string,
+  lookupAttribute: 'name' | 'property',
+  lookupValue: string,
+  content: string,
+) {
+  let tag = document.head.querySelector<HTMLMetaElement>(selector);
+
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(lookupAttribute, lookupValue);
+    document.head.append(tag);
+  }
+
+  tag.setAttribute('content', content);
+}
+
 export default function App() {
   const reducedMotion = useReducedMotion();
   const activeSection = useActiveSection(
@@ -23,15 +40,102 @@ export default function App() {
   );
 
   useEffect(() => {
-    document.title = siteContent.name;
+    const shareUrl = window.location.href;
+    const shareImageUrl = new URL(
+      siteContent.socialPreviewImageSrc,
+      window.location.origin,
+    ).toString();
 
-    const descriptionTag = document.querySelector('meta[name="description"]');
-    if (descriptionTag) {
-      descriptionTag.setAttribute(
-        'content',
-        siteContent.seoDescription,
-      );
+    document.title = siteContent.socialPreviewTitle;
+
+    setMetaTag(
+      'meta[name="description"]',
+      'name',
+      'description',
+      siteContent.seoDescription,
+    );
+    setMetaTag(
+      'meta[property="og:type"]',
+      'property',
+      'og:type',
+      'website',
+    );
+    setMetaTag(
+      'meta[property="og:site_name"]',
+      'property',
+      'og:site_name',
+      siteContent.name,
+    );
+    setMetaTag(
+      'meta[property="og:title"]',
+      'property',
+      'og:title',
+      siteContent.socialPreviewTitle,
+    );
+    setMetaTag(
+      'meta[property="og:description"]',
+      'property',
+      'og:description',
+      siteContent.seoDescription,
+    );
+    setMetaTag(
+      'meta[property="og:url"]',
+      'property',
+      'og:url',
+      shareUrl,
+    );
+    setMetaTag(
+      'meta[property="og:image"]',
+      'property',
+      'og:image',
+      shareImageUrl,
+    );
+    setMetaTag(
+      'meta[property="og:image:alt"]',
+      'property',
+      'og:image:alt',
+      siteContent.socialPreviewImageAlt,
+    );
+    setMetaTag(
+      'meta[name="twitter:card"]',
+      'name',
+      'twitter:card',
+      'summary_large_image',
+    );
+    setMetaTag(
+      'meta[name="twitter:title"]',
+      'name',
+      'twitter:title',
+      siteContent.socialPreviewTitle,
+    );
+    setMetaTag(
+      'meta[name="twitter:description"]',
+      'name',
+      'twitter:description',
+      siteContent.seoDescription,
+    );
+    setMetaTag(
+      'meta[name="twitter:image"]',
+      'name',
+      'twitter:image',
+      shareImageUrl,
+    );
+    setMetaTag(
+      'meta[name="twitter:image:alt"]',
+      'name',
+      'twitter:image:alt',
+      siteContent.socialPreviewImageAlt,
+    );
+
+    let canonicalLink = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.append(canonicalLink);
     }
+
+    canonicalLink.setAttribute('href', shareUrl);
   }, []);
 
   useEffect(() => {
