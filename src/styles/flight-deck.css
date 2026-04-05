@@ -1,0 +1,485 @@
+.site-header__page-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.site-header__bar--no-page-tabs {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.site-header__page-tabs button {
+  min-height: 2.4rem;
+  padding: 0 0.78rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius-md) - 1px);
+  color: var(--color-text-subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.site-header__page-tabs button:hover,
+.site-header__page-tabs button.is-active {
+  color: var(--color-text);
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.mobile-drawer__page-tabs {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.mobile-drawer__page-tabs button {
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mobile-drawer__page-tabs button.is-active,
+.mobile-drawer__page-tabs button:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.flight-page {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  padding:
+    calc(var(--header-height) + 2rem)
+    var(--content-padding)
+    clamp(2rem, 5vw, 4rem);
+}
+
+.flight-hero,
+.flight-console-section,
+.flight-destinations {
+  width: min(100%, var(--max-content-width));
+  margin: 0 auto;
+}
+
+.flight-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.82fr);
+  gap: 1rem;
+}
+
+.flight-hero__copy,
+.flight-hero__stat,
+.flight-console,
+.flight-console__panel,
+.flight-destinations__card,
+.flight-console-section__header {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 100%),
+    rgba(255, 255, 255, 0.012);
+  box-shadow: var(--shadow-soft);
+}
+
+.flight-hero__copy,
+.flight-console-section__header {
+  padding: clamp(1.2rem, 2.8vw, 1.75rem);
+}
+
+.flight-hero__copy {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.flight-hero__eyebrow,
+.flight-console__label,
+.flight-destinations__topline span,
+.flight-hero__stat span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.flight-hero__copy h1,
+.flight-console-section__header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4.2vw, 3.3rem);
+  line-height: 0.94;
+  letter-spacing: 0.02em;
+}
+
+.flight-hero__copy p,
+.flight-console-section__header p,
+.flight-destinations__card p {
+  color: var(--color-text-muted);
+  line-height: 1.72;
+}
+
+.flight-hero__copy p span {
+  color: var(--color-text);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flight-hero__stats {
+  display: grid;
+  gap: 1rem;
+}
+
+.flight-hero__stat {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+  padding: 1.05rem 1.1rem;
+}
+
+.flight-hero__stat strong,
+.flight-console__hud strong,
+.flight-destinations__topline strong,
+.flight-destinations__status strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  line-height: 1;
+}
+
+.flight-hero__stat p,
+.flight-console__hud p,
+.flight-destinations__status span,
+.flight-console__destination-button small {
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.flight-console-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.flight-console-section__header {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.flight-console {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.72fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.flight-console__stage {
+  position: relative;
+  min-height: 38rem;
+  overflow: clip;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(var(--radius-md) - 1px);
+  background:
+    radial-gradient(circle at top, rgba(83, 179, 255, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(3, 9, 14, 0.95), rgba(2, 4, 8, 0.98));
+}
+
+.flight-console__stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 12%),
+    radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.32) 100%);
+}
+
+.flight-console__viewport,
+.flight-console__canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 38rem;
+  display: block;
+}
+
+.flight-console__hud {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  background: rgba(3, 7, 12, 0.62);
+  backdrop-filter: blur(12px);
+}
+
+.flight-console__hud--top {
+  top: 1rem;
+  left: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.flight-console__hud--bottom {
+  right: 1rem;
+  bottom: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.flight-console__hud span {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.flight-console__panel {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding: 1rem;
+}
+
+.flight-console__panel-block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.flight-console__control-list {
+  display: grid;
+  gap: 0.55rem;
+  color: var(--color-text-muted);
+}
+
+.flight-console__control-list strong {
+  color: var(--color-text);
+  letter-spacing: 0.08em;
+}
+
+.flight-console__destination-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.flight-console__destination-button,
+.flight-console__reset,
+.flight-console__touch-button {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.flight-console__destination-button {
+  min-height: 4rem;
+  display: grid;
+  gap: 0.22rem;
+  align-content: center;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.016);
+}
+
+.flight-console__destination-button span {
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.flight-console__destination-button:hover,
+.flight-console__destination-button.is-active,
+.flight-console__destination-button.is-visited,
+.flight-console__reset:hover,
+.flight-console__touch-button:hover,
+.flight-console__touch-button.is-active {
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.flight-console__destination-button.is-active {
+  background:
+    linear-gradient(180deg, rgba(122, 231, 255, 0.12), transparent 100%),
+    rgba(255, 255, 255, 0.05);
+}
+
+.flight-console__destination-button.is-visited {
+  background:
+    linear-gradient(180deg, rgba(255, 211, 140, 0.08), transparent 100%),
+    rgba(255, 255, 255, 0.03);
+}
+
+.flight-console__reset {
+  min-height: 3rem;
+  padding: 0 0.95rem;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.flight-console__touchpad {
+  display: none;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  width: min(100%, var(--max-content-width));
+  margin: 0 auto;
+}
+
+.flight-console__touch-button {
+  min-height: 4.5rem;
+  display: grid;
+  place-items: center;
+  gap: 0.22rem;
+  background: rgba(255, 255, 255, 0.02);
+  touch-action: none;
+}
+
+.flight-console__touch-button strong {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.flight-console__touch-button span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flight-destinations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.flight-destinations__card {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.flight-destinations__card.is-active {
+  border-color: rgba(122, 231, 255, 0.3);
+  background:
+    linear-gradient(180deg, rgba(122, 231, 255, 0.08), transparent 100%),
+    rgba(255, 255, 255, 0.02);
+}
+
+.flight-destinations__card.is-visited {
+  border-color: rgba(255, 211, 140, 0.26);
+}
+
+.flight-destinations__topline,
+.flight-destinations__status {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.flight-destinations__status {
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-rule);
+}
+
+@media (max-width: 1120px) {
+  .site-header__page-tabs {
+    justify-self: start;
+  }
+
+  .flight-hero,
+  .flight-console,
+  .flight-console-section__header,
+  .flight-destinations {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-console__panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .flight-console__reset {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header__page-tabs {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .site-header__page-tabs button {
+    min-width: 0;
+    flex: 1 1 0;
+    padding-inline: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .flight-page {
+    padding-top: calc(var(--header-height) + 1.4rem);
+  }
+
+  .flight-console {
+    padding: 0.75rem;
+  }
+
+  .flight-console__stage,
+  .flight-console__viewport,
+  .flight-console__canvas {
+    min-height: 27rem;
+  }
+
+  .flight-console__hud {
+    position: static;
+    margin: 0.75rem;
+  }
+
+  .flight-console__hud--top,
+  .flight-console__hud--bottom,
+  .flight-console__panel {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-console__panel {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .flight-console__touchpad {
+    display: grid;
+  }
+}
