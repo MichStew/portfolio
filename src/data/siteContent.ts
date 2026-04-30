@@ -225,14 +225,15 @@ export const siteContent: SiteContent = {
     {
       id: 'cogfatigue',
       title: 'CogFatigue',
-      affiliation: 'LLM Reliability Research',
-      dateRange: 'Spring 2026',
+      affiliation: 'Accepted @ ICML 2026',
+      dateRange: 'Fall 2025',
       summary:
         'Studying how attention, entropy, and context-length behavior can surface model fatigue and hallucination risk.',
       focusArea:
         'Attention drift, entropy tracking, context-length stress testing, and early hallucination detection for AI systems.',
       description:
         'CogFatigue focuses on measuring how AI models drift across attention, entropy, and context length, and using those signals to help prevent and detect hallucinations before failures compound. The work is aimed at making model fatigue more observable so reliability issues can be identified earlier and handled more intentionally.',
+      link: 'https://openreview.net/forum?id=dE3Z3bfEzk',
       imageSrc: '/pics/cogfatigue-context.png',
       imageAlt: 'CogFatigue context-length drift summary chart',
     },
